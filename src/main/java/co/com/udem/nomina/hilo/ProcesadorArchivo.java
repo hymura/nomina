@@ -9,31 +9,33 @@ import co.com.udem.nomina.util.LecturaArchivo;
 public class ProcesadorArchivo implements Runnable {
 	
 	private static final Logger logger = LogManager.getLogger(ProcesadorArchivo.class);
-	LecturaArchivo lecturaArchivo = new LecturaArchivo();
+	
 	String mensaje = "";
 	Thread t;
 	
 	public void iniciarHilo() {
-		t = new Thread(this);
+		t = new Thread(new ProcesadorArchivo());
 		t.start();
 	}
 	
 	public void run() {
+		LecturaArchivo lecturaArchivo = new LecturaArchivo();
 		BasicConfigurator.configure();
 		
+		
 		while(true) {
+         	mensaje = lecturaArchivo.leerArchivo();
+			
+			if(lecturaArchivo.cantidadRegistros() == 2) {
+				break;
+			}
+			logger.info("Mensaje: " + mensaje);
 			try {
-				Thread.sleep(30000);
-				mensaje = lecturaArchivo.leerArchivo();
-				
-				if(lecturaArchivo.cantidadRegistros() == 2) {
-					break;
-				}
-				logger.info("Mensaje: " + mensaje);
-				
-			} catch (InterruptedException e) {				
+				Thread.sleep(30000);  
+			} catch (InterruptedException e) {
 				logger.error(e.getMessage());
 				Thread.currentThread().interrupt();
+			
 			}
 			
 		}

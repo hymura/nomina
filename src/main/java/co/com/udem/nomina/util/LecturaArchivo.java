@@ -3,27 +3,25 @@ package co.com.udem.nomina.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Scanner;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import co.com.udem.nomina.dto.EmpleadoDto;
 
-
-
 public class LecturaArchivo {
-
+	private static final String RUTA = "C:\\EjemploArchivos\\empleadoproceso.txt";
 	private static final Logger logger = LogManager.getLogger(LecturaArchivo.class);
-	private HashMap<String, EmpleadoDto> listaEmpleTabla = new HashMap<String, EmpleadoDto>();
-	private int cantidadRegistros = 0;
+	private HashMap<String, EmpleadoDto> listaEmpleadosTabla = new HashMap<String, EmpleadoDto>();
+	private int cantidadRegistros;    
 
 	public String leerArchivo() {
-		BasicConfigurator.configure();
-		File archivoNomina = new File("D:\\Ejercicio_Nomina_Empleados\\nominaEmpleados.txt");
+		File archivoNomina = new File(RUTA);
 		Scanner scanner = null;
 		String mensaje = "";
+		cantidadRegistros = 0;
 
 		try {
 			scanner = new Scanner(archivoNomina);
@@ -34,6 +32,8 @@ public class LecturaArchivo {
 				cantidadRegistros++;
 			}
 
+			imprimirEmpleadoArchivo(listaEmpleadosTabla);
+			
 		} catch (FileNotFoundException ex) {
 			mensaje = "El archivo no está en la ruta especificada";
 			logger.error(ex.getMessage());
@@ -45,51 +45,85 @@ public class LecturaArchivo {
 			}
 
 		}
-
+		
+		mensaje= mensaje+" - "+"Registros leidos: "+cantidadRegistros;
 		return mensaje;
 
 	}
 
 	private void leerRegistro(String infoEmpleado) {
+		
+		Scanner scanner = null;
+		try {        	
+            scanner = new Scanner(infoEmpleado);
+    		scanner.useDelimiter(",");
 
-		Scanner scanner = new Scanner(infoEmpleado);
-		scanner.useDelimiter(",");
+    		while (scanner.hasNext()) {
+    			EmpleadoDto empleado = new EmpleadoDto();
 
-		while (scanner.hasNext()) {
-			EmpleadoDto empleado = new EmpleadoDto();
+    			empleado.setNombres(scanner.next());
+    			empleado.setApellidos(scanner.next());
+    			String cedula = scanner.next();
+    			empleado.setCedula(cedula);
+    			empleado.setEdad(Integer.parseInt(scanner.next()));
+    			empleado.setDepartamento(scanner.next());
+    			empleado.setSalario(Double.parseDouble(scanner.next()));
 
-			empleado.setNombres(scanner.next());
-			empleado.setApellidos(scanner.next());
-			String cedula = scanner.next();
-			empleado.setCedula(cedula);
-			empleado.setDepartamento(scanner.next());
-			empleado.setSalario(Double.parseDouble(scanner.next()));
-
-			if (!existeEmpleado(cedula)) {
-				listaEmpleTabla.put(cedula, empleado);
-			}
+    			validarRegistroEmpleado(cedula, empleado);
+    		}
+    		
+    		scanner.close();
+			
+		} catch (Exception e) {
+			logger.error(e.getStackTrace());			
 		}
-		imprimirEmpleadoArchivo(listaEmpleTabla);
-		scanner.close();
+        finally {
+
+			if (scanner != null) {
+				scanner.close();
+			}
+
+		}
+        
+		
 
 	}
 
-	private boolean existeEmpleado(String cedula) {
+	
+	private void imprimirEmpleadoArchivo(HashMap<String, EmpleadoDto> listaEmpleadosTabla) {
+		
+		Iterator<String> iterator =listaEmpleadosTabla.keySet().iterator();
+		EmpleadoDto empleado;
+		StringBuilder mensaje = new StringBuilder();
+		while (iterator.hasNext()) {
+			empleado=listaEmpleadosTabla.get(iterator.next());
+			
+			mensaje.append("Nombre: " + empleado.getNombres());
+			mensaje.append(" - ");
+			mensaje.append("Apellido: " + empleado.getApellidos());
+			mensaje.append(" - ");
+			mensaje.append("edad: " + empleado.getEdad());
+			mensaje.append(" - ");
+			mensaje.append("Salario: " + empleado.getSalario());
+			mensaje.append(" - ");
+			mensaje.append("Departamento: " + empleado.getDepartamento());
 
-		boolean existe = false;
-
-		if (listaEmpleTabla.containsKey(cedula)) {
-			existe = true;
+			logger.info(mensaje);
+			mensaje.delete(0, mensaje.length());
 		}
-		return existe;
+				
 	}
 	
-	private void imprimirEmpleadoArchivo(HashMap<String, EmpleadoDto> listaEmpleTabla) {
+	private void validarRegistroEmpleado(String cedula, EmpleadoDto empleado) {
+		 
+		if (listaEmpleadosTabla.containsKey(cedula)) {
+			
+			logger.info("El registro  ya existe, cedula: " + cedula);			
+		} else {
+			listaEmpleadosTabla.put(cedula, empleado);			
 		
-		BasicConfigurator.configure();
-		logger.info(listaEmpleTabla);
-		
-		
+		}
+
 	}
 	
 	public int cantidadRegistros() {
