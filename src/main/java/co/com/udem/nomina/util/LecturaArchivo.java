@@ -1,7 +1,6 @@
 package co.com.udem.nomina.util;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -9,16 +8,22 @@ import java.util.Scanner;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import co.com.udem.nomina.dto.EmpleadoDto;
+import co.com.udem.nomin.dto.EmpleadoDto;
+import co.com.udem.nomin.util.LecturaArchivo;
+import co.com.udem.nomin.util.PoblarEstructura;
 
 public class LecturaArchivo {
-	private static final String RUTA = "C:\\EjemploArchivos\\empleadoproceso.txt";
+	
+
+	//private static final String RUTA = "C:\\EjemploArchivos\\empleadoproceso.txt";
+	private static final String RUTA = "/nominaEmpleados.txt";
 	private static final Logger logger = LogManager.getLogger(LecturaArchivo.class);
 	private HashMap<String, EmpleadoDto> listaEmpleadosTabla = new HashMap<String, EmpleadoDto>();
 	private int cantidadRegistros;    
 
 	public String leerArchivo() {
-		File archivoNomina = new File(RUTA);
+		InputStream archivoNomina = null;
+		archivoNomina = ClassLoader.class.getResourceAsStream(RUTA);
 		Scanner scanner = null;
 		String mensaje = "";
 		cantidadRegistros = 0;
@@ -34,7 +39,7 @@ public class LecturaArchivo {
 
 			imprimirEmpleadoArchivo(listaEmpleadosTabla);
 			
-		} catch (FileNotFoundException ex) {
+		} catch (Exception ex) {
 			mensaje = "El archivo no está en la ruta especificada";
 			logger.error(ex.getMessage());
 
@@ -59,17 +64,8 @@ public class LecturaArchivo {
     		scanner.useDelimiter(",");
 
     		while (scanner.hasNext()) {
-    			EmpleadoDto empleado = new EmpleadoDto();
-
-    			empleado.setNombres(scanner.next());
-    			empleado.setApellidos(scanner.next());
-    			String cedula = scanner.next();
-    			empleado.setCedula(cedula);
-    			empleado.setEdad(Integer.parseInt(scanner.next()));
-    			empleado.setDepartamento(scanner.next());
-    			empleado.setSalario(Double.parseDouble(scanner.next()));
-
-    			validarRegistroEmpleado(cedula, empleado);
+    			
+    			llenarDTO(scanner);    			    	
     		}
     		
     		scanner.close();
@@ -86,8 +82,23 @@ public class LecturaArchivo {
 		}
         
 		
-
 	}
+	
+	
+	
+	public  void llenarDTO(Scanner scanner) {
+		EmpleadoDto empleado = new EmpleadoDto();
+		empleado.setNombres(scanner.next());
+		empleado.setApellidos(scanner.next());
+		String cedula = scanner.next();
+		empleado.setCedula(cedula);
+		empleado.setEdad(Integer.parseInt(scanner.next()));
+		empleado.setDepartamento(scanner.next());
+		empleado.setSalario(Double.parseDouble(scanner.next()));
+		
+		PoblarEstructura.validarRegistroEmpleado(cedula, empleadoDTO);
+	}
+	
 
 	
 	private void imprimirEmpleadoArchivo(HashMap<String, EmpleadoDto> listaEmpleadosTabla) {

@@ -4,7 +4,11 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import co.com.udem.nomin.hilo.ProcesadorArchivo;
 import co.com.udem.nomina.util.LecturaArchivo;
+import co.com.udem.nomina.util.PoblarEstructura;
+
+
 
 public class ProcesadorArchivo implements Runnable {
 	
@@ -21,14 +25,15 @@ public class ProcesadorArchivo implements Runnable {
 	public void run() {
 		LecturaArchivo lecturaArchivo = new LecturaArchivo();
 		BasicConfigurator.configure();
-		
-		
+				
 		while(true) {
          	mensaje = lecturaArchivo.leerArchivo();
-			
-			if(lecturaArchivo.cantidadRegistros() == 2) {
+         	int cantidadRegistros = PoblarEstructura.;
+			if(cantidadRegistros == 3) {
 				break;
 			}
+			
+		
 			logger.info("Mensaje: " + mensaje);
 			try {
 				Thread.sleep(30000);  

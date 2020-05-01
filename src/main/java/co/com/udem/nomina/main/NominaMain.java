@@ -1,5 +1,5 @@
 package co.com.udem.nomina.main;
-import co.com.udem.nomina.hilo.ProcesadorArchivo;
+import co.com.udem.nomin.hilo.ProcesadorArchivo;
 
 public class NominaMain {
 	public static void main(String[] args) {
