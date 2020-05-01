@@ -1,0 +1,144 @@
+package co.com.udem.nomina.util;
+
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Scanner;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import co.com.udem.nomin.dto.EmpleadoDto;
+import co.com.udem.nomin.util.LecturaArchivo;
+import co.com.udem.nomin.util.PoblarEstructura;
+
+public class LecturaArchivo {
+	
+
+	//private static final String RUTA = "C:\\EjemploArchivos\\empleadoproceso.txt";
+	private static final String RUTA = "/nominaEmpleados.txt";
+	private static final Logger logger = LogManager.getLogger(LecturaArchivo.class);
+	private HashMap<String, EmpleadoDto> listaEmpleadosTabla = new HashMap<String, EmpleadoDto>();
+	private int cantidadRegistros;    
+
+	public String leerArchivo() {
+		InputStream archivoNomina = null;
+		archivoNomina = ClassLoader.class.getResourceAsStream(RUTA);
+		Scanner scanner = null;
+		String mensaje = "";
+		cantidadRegistros = 0;
+
+		try {
+			scanner = new Scanner(archivoNomina);
+
+			while (scanner.hasNextLine()) {
+				String infoEmpleado = scanner.nextLine();
+				leerRegistro(infoEmpleado);
+				cantidadRegistros++;
+			}
+
+			imprimirEmpleadoArchivo(listaEmpleadosTabla);
+			
+		} catch (Exception ex) {
+			mensaje = "El archivo no está en la ruta especificada";
+			logger.error(ex.getMessage());
+
+		} finally {
+
+			if (scanner != null) {
+				scanner.close();
+			}
+
+		}
+		
+		mensaje= mensaje+" - "+"Registros leidos: "+cantidadRegistros;
+		return mensaje;
+
+	}
+
+	private void leerRegistro(String infoEmpleado) {
+		
+		Scanner scanner = null;
+		try {        	
+            scanner = new Scanner(infoEmpleado);
+    		scanner.useDelimiter(",");
+
+    		while (scanner.hasNext()) {
+    			
+    			llenarDTO(scanner);    			    	
+    		}
+    		
+    		scanner.close();
+			
+		} catch (Exception e) {
+			logger.error(e.getStackTrace());			
+		}
+        finally {
+
+			if (scanner != null) {
+				scanner.close();
+			}
+
+		}
+        
+		
+	}
+	
+	
+	
+	public  void llenarDTO(Scanner scanner) {
+		EmpleadoDto empleado = new EmpleadoDto();
+		empleado.setNombres(scanner.next());
+		empleado.setApellidos(scanner.next());
+		String cedula = scanner.next();
+		empleado.setCedula(cedula);
+		empleado.setEdad(Integer.parseInt(scanner.next()));
+		empleado.setDepartamento(scanner.next());
+		empleado.setSalario(Double.parseDouble(scanner.next()));
+		
+		PoblarEstructura.validarRegistroEmpleado(cedula, empleadoDTO);
+	}
+	
+
+	
+	private void imprimirEmpleadoArchivo(HashMap<String, EmpleadoDto> listaEmpleadosTabla) {
+		
+		Iterator<String> iterator =listaEmpleadosTabla.keySet().iterator();
+		EmpleadoDto empleado;
+		StringBuilder mensaje = new StringBuilder();
+		while (iterator.hasNext()) {
+			empleado=listaEmpleadosTabla.get(iterator.next());
+			
+			mensaje.append("Nombre: " + empleado.getNombres());
+			mensaje.append(" - ");
+			mensaje.append("Apellido: " + empleado.getApellidos());
+			mensaje.append(" - ");
+			mensaje.append("edad: " + empleado.getEdad());
+			mensaje.append(" - ");
+			mensaje.append("Salario: " + empleado.getSalario());
+			mensaje.append(" - ");
+			mensaje.append("Departamento: " + empleado.getDepartamento());
+
+			logger.info(mensaje);
+			mensaje.delete(0, mensaje.length());
+		}
+				
+	}
+	
+	private void validarRegistroEmpleado(String cedula, EmpleadoDto empleado) {
+		 
+		if (listaEmpleadosTabla.containsKey(cedula)) {
+			
+			logger.info("El registro  ya existe, cedula: " + cedula);			
+		} else {
+			listaEmpleadosTabla.put(cedula, empleado);			
+		
+		}
+
+	}
+	
+	public int cantidadRegistros() {
+		return cantidadRegistros;
+	}
+
+}
